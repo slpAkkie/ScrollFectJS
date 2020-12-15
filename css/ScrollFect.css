@@ -4,6 +4,22 @@
   Стили предоставлены для работы ScrollFectJS
 
   Author: Alexandr Shamanin (@slpAkkie)
-  Version: 0.0.0
-  File Version: 0.0.0
+  Version: 1.0.0
+  File Version: 1.0.0
 */
+
+
+
+[class*="scrollfect--a-"] { transition: all .75s ease; }
+
+.scrollfect--a-fade[scrollfect--s-show=false] {
+  opacity: 0;
+
+  transform: scale(.25);
+}
+
+.scrollfect--a-fade[scrollfect--s-show=true] {
+  opacity: 1;
+
+  transform: scale(1);
+}
