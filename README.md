@@ -13,7 +13,7 @@
 В вашем файле js напишите вызов функции `ScrollFect.animate` и передайте в параметрах объект, содержащий как минимум поле `el` равное селектору нужных блоков, или объект класса `HTMLElement`
 
 ```js
- ScrollFect.animate( {
+ScrollFect.animate( {
   el: '.scrollfectjs-card',
 } );
 ```
