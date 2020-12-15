@@ -8,6 +8,71 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- CSS
+  ========================= -->
+  <link rel="stylesheet" href="./css/ScrollFect.css">
+
+  <!-- JS
+  ========================= -->
+  <script src="./js/ScrollFect.js"></script>
+
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+
+      font-size: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .container {
+      width: 1140px;
+      height: 100%;
+
+      margin: 0 auto;
+      padding: 0 30px;
+    }
+
+    .wrapper {
+      height: 2500px;
+    }
+
+    .scrollfectjs-demo,
+    .scrollfectjs-demo__inner {
+      height: 100%;
+    }
+
+    .scrollfectjs-demo__inner {
+      display: flex;
+      flex-direction: column;
+
+      justify-content: center;
+    }
+
+    .scrollfectjs-card {
+      margin: 15px 0;
+      padding: 15px;
+
+      border-radius: .5em;
+      background-color: rgba(131, 152, 210, .015);
+      box-shadow: 0 0 15px 0 rgba(131, 152, 210, .25);
+    }
+
+    .scrollfectjs-card:nth-child(odd) {
+      background-color: rgb(75, 204, 124);
+      color: white;
+    }
+
+    .scrollfectjs-card:nth-child(even) {
+      background-color: rgb(204, 75, 75);
+      color: white;
+    }
+  </style>
+
   <!-- Заголовок страницы
   ========================= -->
   <title>ScrollFectJS</title>
@@ -22,12 +87,72 @@
       <div class="container">
         <div class="scrollfectjs-demo__inner">
 
-          <!-- Контент -->
+          <!-- Карточка демонстрации
+          ========================= -->
+          <div class="scrollfectjs-card" id="scrollfectjs-1">
+            <div class="scrollfectjs-card__inner">
+              <h2>Карточка демонстрации #1</h2>
+              <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas at molestiae magnam aliquid. Et magni
+                ipsum labore, ipsa provident aut consectetur eius fugiat quaerat deleniti!</p>
+            </div>
+          </div> <!-- scrollfectjs-card -->
+
+          <!-- Карточка демонстрации
+          ========================= -->
+          <div class="scrollfectjs-card" id="scrollfectjs-2">
+            <div class="scrollfectjs-card__inner">
+              <h2>Карточка демонстрации #2</h2>
+              <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas at molestiae magnam aliquid. Et magni
+                ipsum labore, ipsa provident aut consectetur eius fugiat quaerat deleniti!</p>
+            </div>
+          </div> <!-- scrollfectjs-card -->
+
+          <!-- Карточка демонстрации
+          ========================= -->
+          <div class="scrollfectjs-card" id="scrollfectjs-3">
+            <div class="scrollfectjs-card__inner">
+              <h2>Карточка демонстрации #3</h2>
+              <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas at molestiae magnam aliquid. Et magni
+                ipsum labore, ipsa provident aut consectetur eius fugiat quaerat deleniti!</p>
+            </div>
+          </div> <!-- scrollfectjs-card -->
+
+          <!-- Карточка демонстрации
+          ========================= -->
+          <div class="scrollfectjs-card" id="scrollfectjs-4">
+            <div class="scrollfectjs-card__inner">
+              <h2>Карточка демонстрации #4</h2>
+              <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas at molestiae magnam aliquid. Et magni
+                ipsum labore, ipsa provident aut consectetur eius fugiat quaerat deleniti!</p>
+            </div>
+          </div> <!-- scrollfectjs-card -->
+
+          <!-- Карточка демонстрации
+          ========================= -->
+          <div class="scrollfectjs-card" id="scrollfectjs-5">
+            <div class="scrollfectjs-card__inner">
+              <h2>Карточка демонстрации #5</h2>
+              <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas at molestiae magnam aliquid. Et magni
+                ipsum labore, ipsa provident aut consectetur eius fugiat quaerat deleniti!</p>
+            </div>
+          </div> <!-- scrollfectjs-card -->
 
         </div>
       </div>
     </div>
   </div> <!-- !wrapper -->
+
+  <!-- JS
+  ========================= -->
+  <script>
+
+    ScrollFect.offsetTop = 70;
+
+    ScrollFect.animate( {
+      el: '.scrollfectjs-card',
+    } );
+
+  </script>
 
 </body>
 
