@@ -14,144 +14,193 @@
 
 class ScrollFect {
 
-  /** @property Количество запусков регистрации объектов */
-  static runCount = 0;
-
-  /** @property Режим отладки */
-  static DEBUG__MODE = true;
-
-
-
-  /** @property Отступ сверху экрана для расчета момента появления (Например если есть фиксированная шапка) */
-  static offsetTop = 0;
-
-
-
-  /** @property Внутренний отступ видимой части, на которой объекты начнут исчезать */
-  static showPadding = 30;
-
-
-
-  /** @property Массив уже зарегистрированных элементов */
-  static animated = Array();
-
-
-
-  /** @property {object} Ключ-значение - CSS классы анимирования */
-  static animations = {
-
-    /** @property {string} Плавное увеличение и появление */
-    Fade: 'scrollfect--a-fade'
-
-  };
-
-
+  /**
+   * @property {Object} Список анимаций элементов с доступом по ключу (HTMLElement который анимируется).
+   */
+  static #animated_store = new Object( {
+    appearance: new Map(),
+    parallax: new Map(),
+    animate: new Map()
+  } );
 
   /**
-   * Устанавливает анимацию для элемента
-   *
-   * @param {string|object} el Селектор элемнта или объект класса HTMLElement
-   * @param {boolean|null} once Должна ли анимация проигрываться только один раз
-   * @param {string|null} animation Какую анимацию задать
+   * @property {Object} Список доступных анимаций
    */
-  static animate( { el, once = false, animation = ScrollFect.animations.Fade } ) {
-
-    ScrollFect.runCount++;
-
-    dd();
-    dd( `[ ${ScrollFect.runCount} ] Была инициирована регистрация элементов на анимирование` );
-
-    el = ScrollFect.getEl( el );
-
-    let scrollHandler = ScrollFect.getHandler( { el, once, animation } );
-    document.addEventListener( 'scroll', scrollHandler );
-    document.addEventListener( 'resize', scrollHandler );
-    scrollHandler();
-
-    dd( `[ ${ScrollFect.runCount} ] Регистрация завершена, обработчики установлены, первоначальный запуск выолнен` );
-    dd();
-
-  }
-
-
-
-  /**
-   * Получить со страницы элементы для анимирования и вернуть массив этих элементов
-   *
-   * @param {string|object|null} el Элементы для получения
-   *
-   * @returns {Array}
-   */
-  static getEl( el ) {
-
-    if ( typeof el === 'string' && el.trim() !== '' ) {
-      let elem = document.querySelectorAll( el.trim() );
-
-      if ( elem.length === 0 ) el = null;
-      else el = Array.from( elem );
-    } else if ( el instanceof HTMLElement ) el = [ el ];
-    else el = null;
-
-    if ( el === null ) throw Error( 'Простите, но я не смог получить указанный элемент, пожалуйста проверьте правильность указанного в поле "el"' );
-
-    return el;
-
-  }
-
-
-
-  /**
-   * Генерация функции обработчика скорлла для указанных элементов с указанными настройками
-   *
-   * @param {Array} el Массив элементов, для которых будет сгенерирована функция
-   * @param {bool} once Должна ли это функция изменять элементы только один раз
-   * @param {string} animation Класс анимации для элементов
-   *
-   * @returns {function}
-   */
-  static getHandler( { el, once, animation } ) {
-
-    el = el.filter( elem => { return ScrollFect.animated.indexOf( elem ) === -1 } );
-
-    el.forEach( ( elem ) => {
-      elem.setAttribute( 'scrollfect--s-show', false );
-      once && elem.setAttribute( 'scrollfect--d-once', true );
-      elem.classList.add( animation );
-
-      ScrollFect.animated.push( elem );
-    } );
-
-    let scrollHandler = function () {
-      el.forEach( ( elem ) => {
-
-        if (
-          window.pageYOffset + ScrollFect.offsetTop + ScrollFect.showPadding < elem.offsetTop + elem.offsetHeight &&
-          window.pageYOffset + window.innerHeight - ScrollFect.showPadding > elem.offsetTop
-        ) elem.setAttribute( 'scrollfect--s-show', true );
-        else if ( !elem.attributes[ 'scrollfect--d-once' ] ) elem.setAttribute( 'scrollfect--s-show', false );
-
-      } );
+  static animations = new Object( {
+    appearance: {
+      get Fade() { return 'appearanceFade' }
     }
+  } );
 
-    el.forEach( ( elem ) => { elem.scrollfectHandler = scrollHandler } );
+  /**
+   * @var {Object} Хранилище анимаций. Элементы - функции возвращающие сгенерированную анимацию. Название начинается с ее типа
+   * appearance - анимации появления
+   */
+  static #animation_store = new Object( {
+    appearanceFade: function ( el, options ) {
 
-    return scrollHandler;
+    }
+  } );
+
+
+
+  /**
+   * Устанавливает анимацию для переданных элементов
+   *
+   * @param {string|HTMLElement|array} elements Элементы, которые должны быть анимированы. Может быть CSS селектором, конкретным HTML элементом (HTMLElement) или массивом из этих вариантов
+   * @param {Object} options Опции, передаваемые конструктору анимаций
+   *
+   * @returns {Function} Функция, которой были анимированы элементы
+   */
+  static appearance( elements, options = {} ) {
 
   }
 
 
 
   /**
-   * Вывод отладочной информации при включенном DEBUG_MODE
+   * Устанавливает параллакс для элементов или их фона
    *
-   * @param {*} data Любое значение для вывода в консоли
+   * @param {string|HTMLElement|array} elements Элементы, которые должны быть анимированы. Может быть CSS селектором, конкретным HTML элементом (HTMLElement) или массивом из этих вариантов
+   * @param {Object} options Опции, передаваемые конструктору анимаций
+   *
+   * @returns {Function} Функция, которой были анимированы элементы
+   */
+  static parallax( elements, options = {} ) {
+
+  }
+
+
+
+  /**
+   * Анимирует переданные элементы пользовательской функцией
+   *
+   * @param {string|HTMLElement|array} elements Элементы, которые должны быть анимированы. Может быть CSS селектором, конкретным HTML элементом (HTMLElement) или массивом из этих вариантов
+   * @param {Function} func Пользовательская функция анимации
+   * @param {Object} options Опции, передаваемые конструктору анимаций
+   *
+   * @returns {Function} Функция, которой были анимированы элементы
+   */
+  static animate( elements, func, options = {} ) {
+
+  }
+
+
+
+  /**
+   * Добавляет пользовательскую функцию анимации в хранилище
+   *
+   * @param {string} animationType Тип регистрируемой анимации, например, appearance
+   * @param {string} name Имя анимации, по которой она потом будет доступна
+   * @param {Function} func Пользовательская функция анимации
+   *
+   * @returns {Function} Зарегистрированная функция
+   */
+  static registerAnimation( animationType, name, func ) {
+
+  }
+
+
+
+  /**
+   * Удалить анимацию для элементов
+   *
+   * @param {string|HTMLElement|array} elements Элементы, для которых необходимо удалить анимации
+   * @param {string} type Тип анимации, которую надо удалить
+   * @param {Function} func Конкретная анимация, которую надо удалить
    *
    * @returns {void}
    */
-  static dd( data = '' ) { ScrollFect.DEBUG__MODE && console.log( data ); }
+  static removeHandlerFor( elements, type, func = null ) {
+
+  }
+
+
+
+  /**
+   * Очистить все установленные анимации
+   *
+   * @param {string|HTMLElement|array} elements Элементы, для которых надо очистить анимации
+   *
+   * @returns {void}
+   */
+  static clearHandlers( elements ) {
+
+  }
+
+
+
+  /**
+   * Обрабатывает переданные элементы, чтобы получить массив готовых HTML элементов
+   *
+   * @param {string|HTMLElement|array} elements Элементы, которые надо обработать
+   *
+   * @returns {array} Массив HTML элементов
+   */
+  static #handleElements( elements ) {
+
+  }
+
+
+
+  /**
+   * Поиск элемента на странцие по CSS селектору
+   *
+   * @param {string} selector CSS селектор, по которому будет искаться элемент
+   *
+   * @returns {HTMLElement|null}
+   */
+  static #getElementsBySelector( selector ) {
+
+  }
+
+
+
+  /**
+   * Проверяет можно ли HTML элементу задать анимацию
+   *
+   * @param {HTMLElement} HTMLElements
+   *
+   * @returns {HTMLElement|null}
+   */
+  static #handleHTMLElements( HTMLElements ) {
+
+  }
+
+
+
+  /**
+   * Генерирует анимацию появления для переданного элемента
+   *
+   * @param {HTMLElement} element Элемент, для которого генерируется функция
+   * @param {Object} options Опции для анимации
+   */
+  static #getAppearance( element, options = {} ) {
+
+  }
+
+
+
+  /**
+   * Генерирует анимацию параллакса для переданного элемента
+   *
+   * @param {HTMLElement} element Элемент, для которого генерируется функция
+   * @param {Object} options Опции для анимации
+   */
+  static #getParallax( element, options = {} ) {
+
+  }
+
+
+
+  /**
+   * Добавляет элемент в хранилище, сохраняя его функцию
+   *
+   * @param {HTMLElement} element Регистрируемый элемент
+   * @param {Function} func Функция, соответствующая элементу
+   */
+  static #registerElement( element, func ) {
+
+  }
 
 }
-
-
-
-const dd = ScrollFect.dd;
