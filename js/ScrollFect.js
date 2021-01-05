@@ -4,8 +4,8 @@
  * Скрипты предоставлены для работы ScrollFectJS
  *
  * Author: Alexandr Shamanin (@slpAkkie)
- * Version: 1.0.0
- * File Version: 1.1.0
+ * Version: 1.0.2
+ * File Version: 1.2.1
 */
 
 
@@ -41,7 +41,7 @@ class ScrollFect {
 
         elems[ i ].style.transitionProperty = 'opacity, transform';
         elems[ i ].style.transitionDuration = `${options.duration}s`;
-        elems[ i ].style.transitionTimingFunction = 'ease-in-out';
+        elems[ i ].style.transitionTimingFunction = 'ease';
       }
 
       /**
@@ -71,6 +71,7 @@ class ScrollFect {
    * @param {Object} options Параметры анимации
    */
   static appearance( elements, options ) {
+    options = ScrollFect.getOptions( options );
     elements = ScrollFect.getElements( elements );
     ScrollFect.setAnimation( elements, options );
 
@@ -138,12 +139,35 @@ class ScrollFect {
    * @param {number} gap Отступ сверху и снизу видимой области
    */
   static inVisibleZone( el, gap ) {
-    if ( window.scrollY + gap < el.offsetTop + el.clientHeight && window.scrollY + innerHeight - gap > el.offsetTop )
+    if ( window.scrollY + gap.top < el.offsetTop + el.clientHeight && window.scrollY + innerHeight - gap.bottom > el.offsetTop )
       el.scrollfectShown = true;
     else
       el.scrollfectShown = false;
 
     return el.scrollfectShown;
+  }
+
+
+
+  static getOptions( o ) {
+    if ( !o.animation || !o.duration ) return false;
+
+    !o.once && ( o.once = false );
+    !o.params && ( o.params = {} );
+
+    if ( o.gap ) {
+      if ( typeof o.gap === 'number' ) o.gap = { top: o.gap, bottom: o.gap }
+      else if ( typeof o.gap === 'array' ) {
+        if ( o.gap[ 0 ] && o.gap[ 1 ] ) o.gap = { top: o.gap[ 0 ], bottom: o.gap[ 1 ] }
+      }
+      else if ( typeof o.gap === 'object' ) {
+        if ( o.gap.top && o.gap.bottom ) o.gap = { top: o.gap.top, bottom: o.gap.bottom }
+      }
+      else return false;
+    }
+    else o.gap = { top: 0, bottom: 0 };
+
+    return o;
   }
 
 
