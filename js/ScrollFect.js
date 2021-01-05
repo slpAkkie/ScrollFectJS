@@ -149,6 +149,11 @@ class ScrollFect {
 
 
 
+  /**
+   * Устанавливает и проверяет параметры анимации
+   *
+   * @param {object} o Параметры анимации
+   */
   static getOptions( o ) {
     if ( !o.animation || !o.duration ) return false;
 
@@ -157,7 +162,7 @@ class ScrollFect {
 
     if ( o.gap ) {
       if ( typeof o.gap === 'number' ) o.gap = { top: o.gap, bottom: o.gap }
-      else if ( typeof o.gap === 'array' ) {
+      else if ( Array.isArray( o.gap ) ) {
         if ( o.gap[ 0 ] && o.gap[ 1 ] ) o.gap = { top: o.gap[ 0 ], bottom: o.gap[ 1 ] }
       }
       else if ( typeof o.gap === 'object' ) {
@@ -181,14 +186,17 @@ class ScrollFect {
    * @returns {array} Массив HTMLElement'ов
    */
   static getElements( elements, depth = 1 ) {
-    if ( typeof elements === 'string' )
-      elements = document.querySelectorAll( elements );
+    if ( typeof elements === 'string' ) {
+      elements = Array.from( document.querySelectorAll( elements ) );
+    }
 
-    else if ( typeof elements === 'array' ) {
+    else if ( Array.isArray( elements ) ) {
       if ( depth === 1 ) for ( let i = 0; i < elements.length; i++ ) {
         let element = ScrollFect.getElements( elements[ i ], depth + 1 );
         if ( element === false ) return false;
-        elements[ i ] = element;
+        Array.isArray( element )
+          ? elements.splice( i, 1, ...element )
+          : elements.splice( i, 1, element );
       }
       else {
         console.error( `Внутри массива находился недопустимый тип элемента. Допустима строка, встречено '${typeof elements}'` );
