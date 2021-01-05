@@ -4,8 +4,8 @@
  * Скрипты предоставлены для работы ScrollFectJS
  *
  * Author: Alexandr Shamanin (@slpAkkie)
- * Version: 1.0.0
- * File Version: 1.0.0
+ * Version: 1.0.2
+ * File Version: 1.2.1
 */
 
 
@@ -14,144 +14,196 @@
 
 class ScrollFect {
 
-  /** @property Количество запусков регистрации объектов */
-  static runCount = 0;
-
-  /** @property Режим отладки */
-  static DEBUG__MODE = true;
 
 
+  /**
+   * @var {Map} Список анимированных блоков с их параметрами
+   */
+  static animatedStore = new Map();
 
-  /** @property Отступ сверху экрана для расчета момента появления (Например если есть фиксированная шапка) */
-  static offsetTop = 0;
+  /**
+   * @var {Object} Предопределенные анимации
+   */
+  static animationStore = new Object( {
 
+    /**
+     * Конструкт анимации плавного появления с увеличением
+     *
+     * @param {array} elems Массив HTMLElement'ов
+     * @param {object} options Параметры
+     */
+    appearanceFade: ( elems, options ) => {
+      for ( let i = 0; i < elems.length; i++ ) {
+        elems[ i ].style.transition = '';
 
+        elems[ i ].style.opacity = '0';
+        elems[ i ].style.transform = 'scale(0.5)';
 
-  /** @property Внутренний отступ видимой части, на которой объекты начнут исчезать */
-  static showPadding = 30;
+        elems[ i ].style.transitionProperty = 'opacity, transform';
+        elems[ i ].style.transitionDuration = `${options.duration}s`;
+        elems[ i ].style.transitionTimingFunction = 'ease';
+      }
 
+      /**
+       * Функция изменения состояния блока
+       *
+       * @param {boolean} visible Виден ли сейчас блок
+       */
+      return function ( visible ) {
+        if ( visible ) {
+          this.style.opacity = '1';
+          this.style.transform = 'scale(1)';
+        } else {
+          this.style.opacity = '0';
+          this.style.transform = 'scale(0.5)';
+        }
+      }
+    },
 
-
-  /** @property Массив уже зарегистрированных элементов */
-  static animated = Array();
-
-
-
-  /** @property {object} Ключ-значение - CSS классы анимирования */
-  static animations = {
-
-    /** @property {string} Плавное увеличение и появление */
-    Fade: 'scrollfect--a-fade'
-
-  };
+  } );
 
 
 
   /**
-   * Устанавливает анимацию для элемента
+   * Устанавливает на блок анимацию появления, когда тот находится в видимой части экрана
    *
-   * @param {string|object} el Селектор элемнта или объект класса HTMLElement
-   * @param {boolean|null} once Должна ли анимация проигрываться только один раз
-   * @param {string|null} animation Какую анимацию задать
+   * @param {string|array|HTMLElement} elements CSS селектор, HTMLElement или массив этих вариантов
+   * @param {Object} options Параметры анимации
    */
-  static animate( { el, once = false, animation = ScrollFect.animations.Fade } ) {
-
-    ScrollFect.runCount++;
-
-    dd();
-    dd( `[ ${ScrollFect.runCount} ] Была инициирована регистрация элементов на анимирование` );
-
-    el = ScrollFect.getEl( el );
-
-    let scrollHandler = ScrollFect.getHandler( { el, once, animation } );
-    document.addEventListener( 'scroll', scrollHandler );
-    document.addEventListener( 'resize', scrollHandler );
-    scrollHandler();
-
-    dd( `[ ${ScrollFect.runCount} ] Регистрация завершена, обработчики установлены, первоначальный запуск выолнен` );
-    dd();
-
-  }
+  static appearance( elements, options ) {
+    options = ScrollFect.getOptions( options );
+    elements = ScrollFect.getElements( elements );
+    ScrollFect.setAnimation( elements, options );
 
 
-
-  /**
-   * Получить со страницы элементы для анимирования и вернуть массив этих элементов
-   *
-   * @param {string|object|null} el Элементы для получения
-   *
-   * @returns {Array}
-   */
-  static getEl( el ) {
-
-    if ( typeof el === 'string' && el.trim() !== '' ) {
-      let elem = document.querySelectorAll( el.trim() );
-
-      if ( elem.length === 0 ) el = null;
-      else el = Array.from( elem );
-    } else if ( el instanceof HTMLElement ) el = [ el ];
-    else el = null;
-
-    if ( el === null ) throw Error( 'Простите, но я не смог получить указанный элемент, пожалуйста проверьте правильность указанного в поле "el"' );
-
-    return el;
-
-  }
-
-
-
-  /**
-   * Генерация функции обработчика скорлла для указанных элементов с указанными настройками
-   *
-   * @param {Array} el Массив элементов, для которых будет сгенерирована функция
-   * @param {bool} once Должна ли это функция изменять элементы только один раз
-   * @param {string} animation Класс анимации для элементов
-   *
-   * @returns {function}
-   */
-  static getHandler( { el, once, animation } ) {
-
-    el = el.filter( elem => { return ScrollFect.animated.indexOf( elem ) === -1 } );
-
-    el.forEach( ( elem ) => {
-      elem.setAttribute( 'scrollfect--s-show', false );
-      once && elem.setAttribute( 'scrollfect--d-once', true );
-      elem.classList.add( animation );
-
-      ScrollFect.animated.push( elem );
-    } );
-
-    let scrollHandler = function () {
-      el.forEach( ( elem ) => {
-
-        if (
-          window.pageYOffset + ScrollFect.offsetTop + ScrollFect.showPadding < elem.offsetTop + elem.offsetHeight &&
-          window.pageYOffset + window.innerHeight - ScrollFect.showPadding > elem.offsetTop
-        ) elem.setAttribute( 'scrollfect--s-show', true );
-        else if ( !elem.attributes[ 'scrollfect--d-once' ] ) elem.setAttribute( 'scrollfect--s-show', false );
-
-      } );
+    if ( !window.ScrollFectAppearanceHandler ) {
+      window.ScrollFectAppearanceHandler = true;
+      window.addEventListener( 'scroll', ScrollFect.appearanceHandler );
     }
 
-    el.forEach( ( elem ) => { elem.scrollfectHandler = scrollHandler } );
-
-    return scrollHandler;
-
+    ScrollFect.appearanceHandler();
   }
 
 
 
   /**
-   * Вывод отладочной информации при включенном DEBUG_MODE
+   * Обработчик прокрутки страницы
    *
-   * @param {*} data Любое значение для вывода в консоли
-   *
-   * @returns {void}
+   * Проверяет все анимированные блоки на то, видно ли их сейчас и применяет анимацию с переданным значение видимости
    */
-  static dd( data = '' ) { ScrollFect.DEBUG__MODE && console.log( data ); }
+  static appearanceHandler() {
+    ScrollFect.animatedStore.forEach( ( options, el ) => {
+      let inVisibleZone = ScrollFect.inVisibleZone( el, options.gap );
+
+      options.animation.bind( el )( inVisibleZone );
+
+      if ( options.once ) ScrollFect.animatedStore.delete( el );
+    } );
+  }
+
+
+
+  /**
+   * Запрашивает анимацию, добавляет параметры и анимацию в хранилище, привязывая их к анимируемому блоку
+   *
+   * @param {array} elements Элементы, которые должны быть анимированы
+   * @param {object} options Параметры анимации
+   */
+  static setAnimation( elements, options ) {
+    options.animation = options.animation( elements, options );
+    for ( let i = 0; i < elements.length; i++ )
+      ScrollFect.animatedStore.set( elements[ i ], options );
+  }
+
+
+
+  /**
+   * Удаляет элемент из анимируемых
+   *
+   * @param {string|array|HTMLElement} elements CSS селектор, HTMLElement или массив этих вариантов
+   */
+  static deleteFrom( elements ) {
+    elements = ScrollFect.getElements( elements );
+
+    for ( let i = 0; i < elements.length; i++ ) {
+      ScrollFect.animatedStore.delete( elements[ i ] );
+    }
+  }
+
+
+
+  /**
+   * Проверяет находится ли элемент в видимой части экрана с поправкой на отступ
+   *
+   * @param {HTMLElement} el Проверяемый элемент
+   * @param {number} gap Отступ сверху и снизу видимой области
+   */
+  static inVisibleZone( el, gap ) {
+    if ( window.scrollY + gap.top < el.offsetTop + el.clientHeight && window.scrollY + innerHeight - gap.bottom > el.offsetTop )
+      el.scrollfectShown = true;
+    else
+      el.scrollfectShown = false;
+
+    return el.scrollfectShown;
+  }
+
+
+
+  static getOptions( o ) {
+    if ( !o.animation || !o.duration ) return false;
+
+    !o.once && ( o.once = false );
+    !o.params && ( o.params = {} );
+
+    if ( o.gap ) {
+      if ( typeof o.gap === 'number' ) o.gap = { top: o.gap, bottom: o.gap }
+      else if ( typeof o.gap === 'array' ) {
+        if ( o.gap[ 0 ] && o.gap[ 1 ] ) o.gap = { top: o.gap[ 0 ], bottom: o.gap[ 1 ] }
+      }
+      else if ( typeof o.gap === 'object' ) {
+        if ( o.gap.top && o.gap.bottom ) o.gap = { top: o.gap.top, bottom: o.gap.bottom }
+      }
+      else return false;
+    }
+    else o.gap = { top: 0, bottom: 0 };
+
+    return o;
+  }
+
+
+
+  /**
+   * Получить элементы для анимирования
+   *
+   * @param {string|array|HTMLElement} elements CSS селектор, HTMLElement или массив этих вариантов
+   * @param {number} depth Глубина рекурсии
+   *
+   * @returns {array} Массив HTMLElement'ов
+   */
+  static getElements( elements, depth = 1 ) {
+    if ( typeof elements === 'string' )
+      elements = document.querySelectorAll( elements );
+
+    else if ( typeof elements === 'array' ) {
+      if ( depth === 1 ) for ( let i = 0; i < elements.length; i++ ) {
+        let element = ScrollFect.getElements( elements[ i ], depth + 1 );
+        if ( element === false ) return false;
+        elements[ i ] = element;
+      }
+      else {
+        console.error( `Внутри массива находился недопустимый тип элемента. Допустима строка, встречено '${typeof elements}'` );
+        return false;
+      }
+    }
+
+    else if ( typeof elements !== 'HTMLElement' ) {
+      console.error( `Первый аргумент передан неверно. Ожидалась строка или массив передано '${typeof elements}'` );
+      return false;
+    }
+
+    return elements;
+  }
+
+
 
 }
-
-
-
-const dd = ScrollFect.dd;

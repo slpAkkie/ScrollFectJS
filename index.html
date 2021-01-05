@@ -8,14 +8,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- CSS
-  ========================= -->
-  <link rel="stylesheet" href="./css/ScrollFect.css">
-
-  <!-- JS
-  ========================= -->
-  <script src="./js/ScrollFect.js"></script>
-
   <style>
     html,
     body {
@@ -30,7 +22,7 @@
     }
 
     .container {
-      width: 1140px;
+      max-width: 1140px;
       height: 100%;
 
       margin: 0 auto;
@@ -144,12 +136,30 @@
 
   <!-- JS
   ========================= -->
+  <script src="./js/ScrollFect.js"></script>
   <script>
 
-    ScrollFect.offsetTop = 70;
-
-    ScrollFect.animate( {
-      el: '.scrollfectjs-card',
+    /**
+     * Метод appearance задает анимацию, когда блок появляется в видимой области экрана
+     *
+     * Первый параметр это css селектор или html элемент или массив этих вариантов
+     * Второй параметр это объект, содержащий информацию для построения анимации
+     */
+    ScrollFect.appearance( '.scrollfectjs-card', {
+      // Какая анимация должны быть проиграна (Может быть задана пользовательская анимация)
+      animation: ScrollFect.animationStore.appearanceFade,
+      // Длительность анимации
+      duration: 0.750,
+      // true - Анимация проиграется один раз, false - будет проигрываться каждый раз
+      once: false,
+      /**
+       * Отступы сверху и снизу видимой части экрана, на которой надо проигрывать анимация.
+       *
+       * Может быть задана просто числом (Отступ сверху и снизу), массивом ([сверху, снизу]) или объектом ({top: 50, bottom: 50})
+      */
+      gap: 50,
+      // Параметры, которые пользователь хочет передать конструктору (Нужно только в случае, если это пользовательская анимация)
+      params: {}
     } );
 
   </script>
