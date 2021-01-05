@@ -4,8 +4,8 @@
  * Скрипты предоставлены для работы ScrollFectJS
  *
  * Author: Alexandr Shamanin (@slpAkkie)
- * Version: 1.0.2
- * File Version: 1.2.1
+ * Version: 1.0.3
+ * File Version: 1.2.2
 */
 
 
