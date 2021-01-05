@@ -5,7 +5,7 @@
  *
  * Author: Alexandr Shamanin (@slpAkkie)
  * Version: 1.0.0
- * File Version: 1.0.0
+ * File Version: 1.1.0
 */
 
 
@@ -14,193 +14,172 @@
 
 class ScrollFect {
 
-  /**
-   * @property {Object} Список анимаций элементов с доступом по ключу (HTMLElement который анимируется).
-   */
-  static #animated_store = new Object( {
-    appearance: new Map(),
-    parallax: new Map(),
-    animate: new Map()
-  } );
+
 
   /**
-   * @property {Object} Список доступных анимаций
+   * @var {Map} Список анимированных блоков с их параметрами
    */
-  static animations = new Object( {
-    appearance: {
-      get Fade() { return 'appearanceFade' }
+  static animatedStore = new Map();
+
+  /**
+   * @var {Object} Предопределенные анимации
+   */
+  static animationStore = new Object( {
+
+    /**
+     * Конструкт анимации плавного появления с увеличением
+     *
+     * @param {array} elems Массив HTMLElement'ов
+     * @param {object} options Параметры
+     */
+    appearanceFade: ( elems, options ) => {
+      for ( let i = 0; i < elems.length; i++ ) {
+        elems[ i ].style.transition = '';
+
+        elems[ i ].style.opacity = '0';
+        elems[ i ].style.transform = 'scale(0.5)';
+
+        elems[ i ].style.transitionProperty = 'opacity, transform';
+        elems[ i ].style.transitionDuration = `${options.duration}s`;
+        elems[ i ].style.transitionTimingFunction = 'ease-in-out';
+      }
+
+      /**
+       * Функция изменения состояния блока
+       *
+       * @param {boolean} visible Виден ли сейчас блок
+       */
+      return function ( visible ) {
+        if ( visible ) {
+          this.style.opacity = '1';
+          this.style.transform = 'scale(1)';
+        } else {
+          this.style.opacity = '0';
+          this.style.transform = 'scale(0.5)';
+        }
+      }
+    },
+
+  } );
+
+
+
+  /**
+   * Устанавливает на блок анимацию появления, когда тот находится в видимой части экрана
+   *
+   * @param {string|array|HTMLElement} elements CSS селектор, HTMLElement или массив этих вариантов
+   * @param {Object} options Параметры анимации
+   */
+  static appearance( elements, options ) {
+    elements = ScrollFect.getElements( elements );
+    ScrollFect.setAnimation( elements, options );
+
+
+    if ( !window.ScrollFectAppearanceHandler ) {
+      window.ScrollFectAppearanceHandler = true;
+      window.addEventListener( 'scroll', ScrollFect.appearanceHandler );
     }
-  } );
+
+    ScrollFect.appearanceHandler();
+  }
+
+
 
   /**
-   * @var {Object} Хранилище анимаций. Элементы - функции возвращающие сгенерированную анимацию. Название начинается с ее типа
-   * appearance - анимации появления
+   * Обработчик прокрутки страницы
+   *
+   * Проверяет все анимированные блоки на то, видно ли их сейчас и применяет анимацию с переданным значение видимости
    */
-  static #animation_store = new Object( {
-    appearanceFade: function ( el, options ) {
+  static appearanceHandler() {
+    ScrollFect.animatedStore.forEach( ( options, el ) => {
+      let inVisibleZone = ScrollFect.inVisibleZone( el, options.gap );
 
+      options.animation.bind( el )( inVisibleZone );
+
+      if ( options.once ) ScrollFect.animatedStore.delete( el );
+    } );
+  }
+
+
+
+  /**
+   * Запрашивает анимацию, добавляет параметры и анимацию в хранилище, привязывая их к анимируемому блоку
+   *
+   * @param {array} elements Элементы, которые должны быть анимированы
+   * @param {object} options Параметры анимации
+   */
+  static setAnimation( elements, options ) {
+    options.animation = options.animation( elements, options );
+    for ( let i = 0; i < elements.length; i++ )
+      ScrollFect.animatedStore.set( elements[ i ], options );
+  }
+
+
+
+  /**
+   * Удаляет элемент из анимируемых
+   *
+   * @param {string|array|HTMLElement} elements CSS селектор, HTMLElement или массив этих вариантов
+   */
+  static deleteFrom( elements ) {
+    elements = ScrollFect.getElements( elements );
+
+    for ( let i = 0; i < elements.length; i++ ) {
+      ScrollFect.animatedStore.delete( elements[ i ] );
     }
-  } );
-
-
-
-  /**
-   * Устанавливает анимацию для переданных элементов
-   *
-   * @param {string|HTMLElement|array} elements Элементы, которые должны быть анимированы. Может быть CSS селектором, конкретным HTML элементом (HTMLElement) или массивом из этих вариантов
-   * @param {Object} options Опции, передаваемые конструктору анимаций
-   *
-   * @returns {Function} Функция, которой были анимированы элементы
-   */
-  static appearance( elements, options = {} ) {
-
   }
 
 
 
   /**
-   * Устанавливает параллакс для элементов или их фона
+   * Проверяет находится ли элемент в видимой части экрана с поправкой на отступ
    *
-   * @param {string|HTMLElement|array} elements Элементы, которые должны быть анимированы. Может быть CSS селектором, конкретным HTML элементом (HTMLElement) или массивом из этих вариантов
-   * @param {Object} options Опции, передаваемые конструктору анимаций
-   *
-   * @returns {Function} Функция, которой были анимированы элементы
+   * @param {HTMLElement} el Проверяемый элемент
+   * @param {number} gap Отступ сверху и снизу видимой области
    */
-  static parallax( elements, options = {} ) {
+  static inVisibleZone( el, gap ) {
+    if ( window.scrollY + gap < el.offsetTop + el.clientHeight && window.scrollY + innerHeight - gap > el.offsetTop )
+      el.scrollfectShown = true;
+    else
+      el.scrollfectShown = false;
 
+    return el.scrollfectShown;
   }
 
 
 
   /**
-   * Анимирует переданные элементы пользовательской функцией
+   * Получить элементы для анимирования
    *
-   * @param {string|HTMLElement|array} elements Элементы, которые должны быть анимированы. Может быть CSS селектором, конкретным HTML элементом (HTMLElement) или массивом из этих вариантов
-   * @param {Function} func Пользовательская функция анимации
-   * @param {Object} options Опции, передаваемые конструктору анимаций
+   * @param {string|array|HTMLElement} elements CSS селектор, HTMLElement или массив этих вариантов
+   * @param {number} depth Глубина рекурсии
    *
-   * @returns {Function} Функция, которой были анимированы элементы
+   * @returns {array} Массив HTMLElement'ов
    */
-  static animate( elements, func, options = {} ) {
+  static getElements( elements, depth = 1 ) {
+    if ( typeof elements === 'string' )
+      elements = document.querySelectorAll( elements );
 
+    else if ( typeof elements === 'array' ) {
+      if ( depth === 1 ) for ( let i = 0; i < elements.length; i++ ) {
+        let element = ScrollFect.getElements( elements[ i ], depth + 1 );
+        if ( element === false ) return false;
+        elements[ i ] = element;
+      }
+      else {
+        console.error( `Внутри массива находился недопустимый тип элемента. Допустима строка, встречено '${typeof elements}'` );
+        return false;
+      }
+    }
+
+    else if ( typeof elements !== 'HTMLElement' ) {
+      console.error( `Первый аргумент передан неверно. Ожидалась строка или массив передано '${typeof elements}'` );
+      return false;
+    }
+
+    return elements;
   }
 
 
-
-  /**
-   * Добавляет пользовательскую функцию анимации в хранилище
-   *
-   * @param {string} animationType Тип регистрируемой анимации, например, appearance
-   * @param {string} name Имя анимации, по которой она потом будет доступна
-   * @param {Function} func Пользовательская функция анимации
-   *
-   * @returns {Function} Зарегистрированная функция
-   */
-  static registerAnimation( animationType, name, func ) {
-
-  }
-
-
-
-  /**
-   * Удалить анимацию для элементов
-   *
-   * @param {string|HTMLElement|array} elements Элементы, для которых необходимо удалить анимации
-   * @param {string} type Тип анимации, которую надо удалить
-   * @param {Function} func Конкретная анимация, которую надо удалить
-   *
-   * @returns {void}
-   */
-  static removeHandlerFor( elements, type, func = null ) {
-
-  }
-
-
-
-  /**
-   * Очистить все установленные анимации
-   *
-   * @param {string|HTMLElement|array} elements Элементы, для которых надо очистить анимации
-   *
-   * @returns {void}
-   */
-  static clearHandlers( elements ) {
-
-  }
-
-
-
-  /**
-   * Обрабатывает переданные элементы, чтобы получить массив готовых HTML элементов
-   *
-   * @param {string|HTMLElement|array} elements Элементы, которые надо обработать
-   *
-   * @returns {array} Массив HTML элементов
-   */
-  static #handleElements( elements ) {
-
-  }
-
-
-
-  /**
-   * Поиск элемента на странцие по CSS селектору
-   *
-   * @param {string} selector CSS селектор, по которому будет искаться элемент
-   *
-   * @returns {HTMLElement|null}
-   */
-  static #getElementsBySelector( selector ) {
-
-  }
-
-
-
-  /**
-   * Проверяет можно ли HTML элементу задать анимацию
-   *
-   * @param {HTMLElement} HTMLElements
-   *
-   * @returns {HTMLElement|null}
-   */
-  static #handleHTMLElements( HTMLElements ) {
-
-  }
-
-
-
-  /**
-   * Генерирует анимацию появления для переданного элемента
-   *
-   * @param {HTMLElement} element Элемент, для которого генерируется функция
-   * @param {Object} options Опции для анимации
-   */
-  static #getAppearance( element, options = {} ) {
-
-  }
-
-
-
-  /**
-   * Генерирует анимацию параллакса для переданного элемента
-   *
-   * @param {HTMLElement} element Элемент, для которого генерируется функция
-   * @param {Object} options Опции для анимации
-   */
-  static #getParallax( element, options = {} ) {
-
-  }
-
-
-
-  /**
-   * Добавляет элемент в хранилище, сохраняя его функцию
-   *
-   * @param {HTMLElement} element Регистрируемый элемент
-   * @param {Function} func Функция, соответствующая элементу
-   */
-  static #registerElement( element, func ) {
-
-  }
 
 }
