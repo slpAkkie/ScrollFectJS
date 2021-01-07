@@ -4,8 +4,8 @@
  * Скрипты предоставлены для работы ScrollFectJS
  *
  * Author: Alexandr Shamanin (@slpAkkie)
- * Version: 1.0.3
- * File Version: 1.2.2
+ * Version: 1.0.4
+ * File Version: 1.2.6
 */
 
 
@@ -33,11 +33,14 @@ class ScrollFect {
      * @param {object} options Параметры
      */
     appearanceFade: ( elems, options ) => {
+      let params = options.params;
+      ( !params.minScale || ( typeof params.minScale !== 'number' ) ) && ( params.minScale = 0.5 );
+
       for ( let i = 0; i < elems.length; i++ ) {
         elems[ i ].style.transition = '';
 
         elems[ i ].style.opacity = '0';
-        elems[ i ].style.transform = 'scale(0.5)';
+        elems[ i ].style.transform = `scale(${params.minScale})`;
 
         elems[ i ].style.transitionProperty = 'opacity, transform';
         elems[ i ].style.transitionDuration = `${options.duration}s`;
@@ -55,7 +58,45 @@ class ScrollFect {
           this.style.transform = 'scale(1)';
         } else {
           this.style.opacity = '0';
-          this.style.transform = 'scale(0.5)';
+          this.style.transform = `scale(${params.minScale})`;
+        }
+      }
+    },
+
+    /**
+     * Конструкт анимации появления сверху
+     *
+     * @param {array} elems Массив HTMLElement'ов
+     * @param {object} options Параметры
+     */
+    appearanceSlideTop: ( elems, options ) => {
+      let params = options.params;
+      ( !params.topOffset || ( typeof params.topOffset !== 'number' ) ) && ( params.topOffset = -50 );
+      params.topOffset = -Math.abs( params.topOffset );
+
+      for ( let i = 0; i < elems.length; i++ ) {
+        elems[ i ].style.transition = '';
+
+        elems[ i ].style.opacity = '0';
+        elems[ i ].style.transform = `translateY(${params.topOffset}px)`;
+
+        elems[ i ].style.transitionProperty = 'opacity, transform';
+        elems[ i ].style.transitionDuration = `${options.duration}s`;
+        elems[ i ].style.transitionTimingFunction = 'ease';
+      }
+
+      /**
+       * Функция изменения состояния блока
+       *
+       * @param {boolean} visible Виден ли сейчас блок
+       */
+      return function ( visible ) {
+        if ( visible ) {
+          this.style.opacity = '1';
+          this.style.transform = 'translateY(0px)';
+        } else {
+          this.style.opacity = '0';
+          this.style.transform = `translateY(${params.topOffset}px)`;
         }
       }
     },
@@ -81,7 +122,7 @@ class ScrollFect {
       window.addEventListener( 'scroll', ScrollFect.appearanceHandler );
     }
 
-    ScrollFect.appearanceHandler();
+    setTimeout( ScrollFect.appearanceHandler, 0 );
   }
 
 
@@ -93,7 +134,7 @@ class ScrollFect {
    */
   static appearanceHandler() {
     ScrollFect.animatedStore.forEach( ( options, el ) => {
-      let inVisibleZone = ScrollFect.inVisibleZone( el, options.gap );
+      let inVisibleZone = ( options.onVisible === false ) || ScrollFect.inVisibleZone( el, options.gap );
 
       options.animation.bind( el )( inVisibleZone );
 
@@ -158,6 +199,7 @@ class ScrollFect {
     if ( !o.animation || !o.duration ) return false;
 
     !o.once && ( o.once = false );
+    ( o.onVisible !== false ) && ( o.onVisible = true );
     !o.params && ( o.params = {} );
 
     if ( o.gap ) {
