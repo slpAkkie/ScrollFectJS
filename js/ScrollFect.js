@@ -4,8 +4,8 @@
  * Скрипты предоставлены для работы ScrollFectJS
  *
  * Author: Alexandr Shamanin (@slpAkkie)
- * Version: 1.0.4
- * File Version: 1.2.6
+ * Version: 1.0.5
+ * File Version: 1.2.7
 */
 
 
@@ -120,6 +120,7 @@ class ScrollFect {
     if ( !window.ScrollFectAppearanceHandler ) {
       window.ScrollFectAppearanceHandler = true;
       window.addEventListener( 'scroll', ScrollFect.appearanceHandler );
+      window.addEventListener( 'resize', ScrollFect.appearanceHandler );
     }
 
     setTimeout( ScrollFect.appearanceHandler, 0 );
@@ -246,10 +247,12 @@ class ScrollFect {
       }
     }
 
-    else if ( typeof elements !== 'HTMLElement' ) {
+    else if ( !( elements instanceof Element ) ) {
       console.error( `Первый аргумент передан неверно. Ожидалась строка или массив передано '${typeof elements}'` );
       return false;
     }
+
+    if ( depth === 1 && elements instanceof Element ) return [ elements ];
 
     return elements;
   }
