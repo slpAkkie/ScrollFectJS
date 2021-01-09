@@ -4,8 +4,8 @@
  * Скрипты предоставлены для работы ScrollFectJS
  *
  * Author: Alexandr Shamanin (@slpAkkie)
- * Version: 1.0.5
- * File Version: 1.2.7
+ * Version: 1.0.6
+ * File Version: 1.2.8
 */
 
 
@@ -32,7 +32,7 @@ class ScrollFect {
      * @param {array} elems Массив HTMLElement'ов
      * @param {object} options Параметры
      */
-    appearanceFade: ( elems, options ) => {
+    appearanceFade: function ( elems, options ) {
       let params = options.params;
       ( !params.minScale || ( typeof params.minScale !== 'number' ) ) && ( params.minScale = 0.5 );
 
@@ -69,7 +69,7 @@ class ScrollFect {
      * @param {array} elems Массив HTMLElement'ов
      * @param {object} options Параметры
      */
-    appearanceSlideTop: ( elems, options ) => {
+    appearanceSlideTop: function ( elems, options ) {
       let params = options.params;
       ( !params.topOffset || ( typeof params.topOffset !== 'number' ) ) && ( params.topOffset = -50 );
       params.topOffset = -Math.abs( params.topOffset );
@@ -111,7 +111,7 @@ class ScrollFect {
    * @param {string|array|HTMLElement} elements CSS селектор, HTMLElement или массив этих вариантов
    * @param {Object} options Параметры анимации
    */
-  static appearance( elements, options ) {
+  static async appearance( elements, options ) {
     options = ScrollFect.getOptions( options );
     elements = ScrollFect.getElements( elements );
     ScrollFect.setAnimation( elements, options );
@@ -133,7 +133,7 @@ class ScrollFect {
    *
    * Проверяет все анимированные блоки на то, видно ли их сейчас и применяет анимацию с переданным значение видимости
    */
-  static appearanceHandler() {
+  static async appearanceHandler() {
     ScrollFect.animatedStore.forEach( ( options, el ) => {
       let inVisibleZone = ( options.onVisible === false ) || ScrollFect.inVisibleZone( el, options.gap );
 
