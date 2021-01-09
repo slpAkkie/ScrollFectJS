@@ -4,8 +4,8 @@
  * Скрипты предоставлены для работы ScrollFectJS
  *
  * Author: Alexandr Shamanin (@slpAkkie)
- * Version: 1.0.6
- * File Version: 1.2.8
+ * Version: 1.0.7
+ * File Version: 1.2.9
 */
 
 
@@ -34,7 +34,7 @@ class ScrollFect {
      */
     appearanceFade: function ( elems, options ) {
       let params = options.params;
-      ( !params.minScale || ( typeof params.minScale !== 'number' ) ) && ( params.minScale = 0.5 );
+      ( !params.minScale || ( typeof params.minScale !== 'number' ) ) && ( params.minScale = 0.85 );
 
       for ( let i = 0; i < elems.length; i++ ) {
         elems[ i ].style.transition = '';
@@ -71,14 +71,14 @@ class ScrollFect {
      */
     appearanceSlideTop: function ( elems, options ) {
       let params = options.params;
-      ( !params.topOffset || ( typeof params.topOffset !== 'number' ) ) && ( params.topOffset = -50 );
-      params.topOffset = -Math.abs( params.topOffset );
+      ( !params.offset || ( typeof params.offset !== 'number' ) ) && ( params.offset = -25 );
+      params.offset = -Math.abs( params.offset );
 
       for ( let i = 0; i < elems.length; i++ ) {
         elems[ i ].style.transition = '';
 
         elems[ i ].style.opacity = '0';
-        elems[ i ].style.transform = `translateY(${params.topOffset}px)`;
+        elems[ i ].style.transform = `translateY(${params.offset}px)`;
 
         elems[ i ].style.transitionProperty = 'opacity, transform';
         elems[ i ].style.transitionDuration = `${options.duration}s`;
@@ -97,6 +97,120 @@ class ScrollFect {
         } else {
           this.style.opacity = '0';
           this.style.transform = `translateY(${params.topOffset}px)`;
+        }
+      }
+    },
+
+    /**
+     * Конструкт анимации появления снизу
+     *
+     * @param {array} elems Массив HTMLElement'ов
+     * @param {object} options Параметры
+     */
+    appearanceSlideBottom: function ( elems, options ) {
+      let params = options.params;
+      ( !params.offset || ( typeof params.offset !== 'number' ) ) && ( params.offset = 25 );
+      params.offset = Math.abs( params.offset );
+
+      for ( let i = 0; i < elems.length; i++ ) {
+        elems[ i ].style.transition = '';
+
+        elems[ i ].style.opacity = '0';
+        elems[ i ].style.transform = `translateY(${params.offset}px)`;
+
+        elems[ i ].style.transitionProperty = 'opacity, transform';
+        elems[ i ].style.transitionDuration = `${options.duration}s`;
+        elems[ i ].style.transitionTimingFunction = 'ease';
+      }
+
+      /**
+       * Функция изменения состояния блока
+       *
+       * @param {boolean} visible Виден ли сейчас блок
+       */
+      return function ( visible ) {
+        if ( visible ) {
+          this.style.opacity = '1';
+          this.style.transform = 'translateY(0px)';
+        } else {
+          this.style.opacity = '0';
+          this.style.transform = `translateY(${params.topOffset}px)`;
+        }
+      }
+    },
+
+    /**
+     * Конструкт анимации появления слева
+     *
+     * @param {array} elems Массив HTMLElement'ов
+     * @param {object} options Параметры
+     */
+    appearanceSlideLeft: function ( elems, options ) {
+      let params = options.params;
+      ( !params.offset || ( typeof params.offset !== 'number' ) ) && ( params.offset = -25 );
+      params.offset = -Math.abs( params.offset );
+
+      for ( let i = 0; i < elems.length; i++ ) {
+        elems[ i ].style.transition = '';
+
+        elems[ i ].style.opacity = '0';
+        elems[ i ].style.transform = `translateX(${params.offset}px)`;
+
+        elems[ i ].style.transitionProperty = 'opacity, transform';
+        elems[ i ].style.transitionDuration = `${options.duration}s`;
+        elems[ i ].style.transitionTimingFunction = 'ease';
+      }
+
+      /**
+       * Функция изменения состояния блока
+       *
+       * @param {boolean} visible Виден ли сейчас блок
+       */
+      return function ( visible ) {
+        if ( visible ) {
+          this.style.opacity = '1';
+          this.style.transform = 'translateX(0px)';
+        } else {
+          this.style.opacity = '0';
+          this.style.transform = `translateX(${params.offset}px)`;
+        }
+      }
+    },
+
+    /**
+     * Конструкт анимации появления справа
+     *
+     * @param {array} elems Массив HTMLElement'ов
+     * @param {object} options Параметры
+     */
+    appearanceSlideRight: function ( elems, options ) {
+      let params = options.params;
+      ( !params.offset || ( typeof params.offset !== 'number' ) ) && ( params.offset = 25 );
+      params.offset = Math.abs( params.offset );
+
+      for ( let i = 0; i < elems.length; i++ ) {
+        elems[ i ].style.transition = '';
+
+        elems[ i ].style.opacity = '0';
+        elems[ i ].style.transform = `translateX(${params.offset}px)`;
+
+        elems[ i ].style.transitionProperty = 'opacity, transform';
+        elems[ i ].style.transitionDuration = `${options.duration}s`;
+        elems[ i ].style.transitionTimingFunction = 'ease';
+      }
+
+      /**
+       * Функция изменения состояния блока
+       *
+       * @param {boolean} visible Виден ли сейчас блок
+       */
+      return function ( visible ) {
+        if ( visible ) {
+          this.style.opacity = '1';
+          this.style.transform = 'translateX(0px)';
+        } else {
+          this.style.opacity = '0';
+          this.style.transform = `translateX(${params.offset}px)`;
         }
       }
     },
