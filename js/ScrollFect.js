@@ -4,8 +4,8 @@
  * Скрипты предоставлены для работы ScrollFectJS
  *
  * Author: Alexandr Shamanin (@slpAkkie)
- * Version: 1.0.7
- * File Version: 1.2.9
+ * Version: 1.0.8
+ * File Version: 1.2.10
 */
 
 
@@ -41,6 +41,9 @@ class ScrollFect {
 
         elems[ i ].style.opacity = '0';
         elems[ i ].style.transform = `scale(${params.minScale})`;
+
+        /** HACK: Строчка нужна, чтобы стили, заданные выше применились до того, как я их снова изменю */
+        elems[ i ].offsetWidth;
 
         elems[ i ].style.transitionProperty = 'opacity, transform';
         elems[ i ].style.transitionDuration = `${options.duration}s`;
@@ -80,6 +83,9 @@ class ScrollFect {
         elems[ i ].style.opacity = '0';
         elems[ i ].style.transform = `translateY(${params.offset}px)`;
 
+        /** HACK: Строчка нужна, чтобы стили, заданные выше применились до того, как я их снова изменю */
+        elems[ i ].offsetWidth;
+
         elems[ i ].style.transitionProperty = 'opacity, transform';
         elems[ i ].style.transitionDuration = `${options.duration}s`;
         elems[ i ].style.transitionTimingFunction = 'ease';
@@ -117,6 +123,9 @@ class ScrollFect {
 
         elems[ i ].style.opacity = '0';
         elems[ i ].style.transform = `translateY(${params.offset}px)`;
+
+        /** HACK: Строчка нужна, чтобы стили, заданные выше применились до того, как я их снова изменю */
+        elems[ i ].offsetWidth;
 
         elems[ i ].style.transitionProperty = 'opacity, transform';
         elems[ i ].style.transitionDuration = `${options.duration}s`;
@@ -156,6 +165,9 @@ class ScrollFect {
         elems[ i ].style.opacity = '0';
         elems[ i ].style.transform = `translateX(${params.offset}px)`;
 
+        /** HACK: Строчка нужна, чтобы стили, заданные выше применились до того, как я их снова изменю */
+        elems[ i ].offsetWidth;
+
         elems[ i ].style.transitionProperty = 'opacity, transform';
         elems[ i ].style.transitionDuration = `${options.duration}s`;
         elems[ i ].style.transitionTimingFunction = 'ease';
@@ -194,6 +206,9 @@ class ScrollFect {
         elems[ i ].style.opacity = '0';
         elems[ i ].style.transform = `translateX(${params.offset}px)`;
 
+        /** HACK: Строчка нужна, чтобы стили, заданные выше применились до того, как я их снова изменю */
+        elems[ i ].offsetWidth;
+
         elems[ i ].style.transitionProperty = 'opacity, transform';
         elems[ i ].style.transitionDuration = `${options.duration}s`;
         elems[ i ].style.transitionTimingFunction = 'ease';
@@ -225,7 +240,7 @@ class ScrollFect {
    * @param {string|array|HTMLElement} elements CSS селектор, HTMLElement или массив этих вариантов
    * @param {Object} options Параметры анимации
    */
-  static async appearance( elements, options ) {
+  static appearance( elements, options ) {
     options = ScrollFect.getOptions( options );
     elements = ScrollFect.getElements( elements );
     ScrollFect.setAnimation( elements, options );
@@ -247,11 +262,12 @@ class ScrollFect {
    *
    * Проверяет все анимированные блоки на то, видно ли их сейчас и применяет анимацию с переданным значение видимости
    */
-  static async appearanceHandler() {
+  static appearanceHandler() {
     ScrollFect.animatedStore.forEach( ( options, el ) => {
+      if ( el.scrollfectShown === true ) return;
       let inVisibleZone = ( options.onVisible === false ) || ScrollFect.inVisibleZone( el, options.gap );
 
-      options.animation.bind( el )( inVisibleZone );
+      options.animation.call( el, inVisibleZone );
 
       if ( options.once ) ScrollFect.animatedStore.delete( el );
     } );
