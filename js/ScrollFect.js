@@ -4,8 +4,8 @@
  * Скрипты предоставлены для работы ScrollFectJS
  *
  * Author: Alexandr Shamanin (@slpAkkie)
- * Version: 1.0.8
- * File Version: 1.2.10
+ * Version: 1.0.9
+ * File Version: 1.2.11
 */
 
 
@@ -264,8 +264,9 @@ class ScrollFect {
    */
   static appearanceHandler() {
     ScrollFect.animatedStore.forEach( ( options, el ) => {
-      if ( el.scrollfectShown === true ) return;
+      let lastStatus = el.scrollfectShown === true;
       let inVisibleZone = ( options.onVisible === false ) || ScrollFect.inVisibleZone( el, options.gap );
+      if ( lastStatus === inVisibleZone ) return;
 
       options.animation.call( el, inVisibleZone );
 
