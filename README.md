@@ -45,7 +45,7 @@ Alexandr Shamanin (@slpAkkie)
 
 ## Версия
 
-1.0.5
+1.0.9
 
 ## Лицензия
 
